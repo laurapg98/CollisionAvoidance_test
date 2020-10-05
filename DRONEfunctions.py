@@ -2,8 +2,9 @@ from dronekit import connect, VehicleMode, Command, LocationGlobal
 from pymavlink import mavutil
 
 # Starts connection with the drone (controller)
-def start_connection(connection_string):
-    vehicle = connect(connection_string, wait_ready=True)
+def start_connection():
+    # connection options: SITL
+    vehicle=connect('tcp:127.0.0.1:5760', wait_ready=True)
     return vehicle
 
 # Stops connection with the drone

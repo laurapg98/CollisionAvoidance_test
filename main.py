@@ -1,18 +1,16 @@
 from D435functions import start_D435, data_D435, exists_obstacle_ahead, stop_D435
 from DRONEfunctions import start_connection, stop_connection, stop_mission, save_mission, change_altitude, move_forward, add_current_waypoint, upload_mission
-from ALTIMETERfunctions import start_alt, data_alt, exists_obstacle_under, stop_alt
+from ALTIMETERfunctions import start_alt, stop_alt, getDistance, exists_obstacle_under
 import time
+import serial
 import dronekit_sitl
 
 # Flight parameters
 flightaltitude = 2 #m ???????(invent)??????? m *******************************************
 speed = 5 #m/s ???????(invent)??????? m *******************************************
 
-# Altimeter port (where it's connected)
-port_alt = 1 # ******************* PORT DE L'ALTÍMETRE ******************* 
-
 # Camera serial number (to identify it)
-serialnumber_D435 = 1 # ******************* NÚM. DE SÈRIE DE LA CÀMERA *******************
+serialnumber_D435 = 829212070982 # ******************* NÚM. DE SÈRIE DE LA CÀMERA *******************
 
 # Camera number of pixels
 xmin = 0
@@ -22,8 +20,8 @@ ymax = 720
 
 # Connection with altimeter
 pipe_alt = None
-while pipe_alt == None:
-    pipe_alt = start_alt(port_alt)
+while (pipe_alt == None):
+    pipe_alt = start_alt()
 
 # Connection with D435 camera
 pipe_D435 = None
@@ -32,12 +30,11 @@ while pipe_D435 == None:
 
 # Starts simulation
 sitl = dronekit_sitl.start_default()
-connection_string = sitl.connection_string()
 
 # Connection with drone
 vehicle = None
 while vehicle == None:
-    vehicle = start_connection(connection_string)
+    vehicle = start_connection()
 while not vehicle.is_armable:
     time.sleep(1)
 
@@ -49,7 +46,7 @@ try:
     while True:
 
         # Altitude data
-        altitude = data_alt(pipe_alt)
+        altitude = getDistance(pipe_alt)
 
         # Check altitude
         while (altitude != flightaltitude):

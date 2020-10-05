@@ -1,30 +1,32 @@
-import PyLidar3 as libALT
-import time
+import serial
 
-# Starts connection with the altimeter
-def start_alt(port_alt):
-    obj = libALT.LIDARLite(port_alt)
-    if obj.Connect():
-        obj.StartScanning()
-        return obj
-    else:
-        return None
+# Starts connection with distance sensor TF mini
+def start_alt():
+    pipe_alt = serial.Serial("/dev/ttyAMA0", 115200)
+    while (pipe_alt.is_open == False):
+        pipe_alt.open()
+    return pipe_alt
 
-# Returns altitude data
-def data_alt(obj):
-    altitude = obj.distance
-    time.sleep(0.005)
-    return altitude
+# Returns distance measure 
+def getDistance(pipe_alt):
+    while True:
+        count = pipe_alt.in_waiting
+        if (count > 8):
+            recv = pipe_alt.read(9)
+            pipe_alt.reset_input_buffer()
+            if ((recv[0] == 'Y') and (recv[1] == 'Y')):
+                low = int(recv[2].encode('hex'),16)
+                high = int(recv[3].encode('hex'),16)
+                distance = low + high * 256
+                return distance
 
-# Establish (true, false) if there is an obstacle under the drone
-def exists_obstacle_under(pipe_alt, flightaltitude, Ah):
-    altitude_alt = data_alt(pipe_alt)
-    if (altitude_alt == flightaltitude + Ah):
+# Compares altitude and returns True if there is an obstacle below the drone or False if not
+def exists_obstacle_under(pipe_alt, flightaltitude, change_altitude):
+    if (pipe_alt == flightaltitude + change_altitude):
         return False
     else:
         return True
 
-# Stops connection
-def stop_alt(obj):
-    obj.Disconnect()
-    
+# Stops connection with distance sensor
+def stop_alt(pipe_alt):
+    pipe_alt.close()
