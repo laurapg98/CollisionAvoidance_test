@@ -1,9 +1,11 @@
-from D435functions import start_D435, data_D435, exists_obstacle_ahead, stop_D435
-from DRONEfunctions import start_connection, stop_connection, stop_mission, save_mission, change_altitude, move_forward, add_current_waypoint, upload_mission
-from ALTIMETERfunctions import start_alt, stop_alt, getDistance_alt, exists_obstacle_under
 import time
 import serial
 import dronekit_sitl
+
+# Import functions
+from D435functions import start_D435, data_D435, exists_obstacle_ahead, stop_D435
+from DRONEfunctions import start_connection, stop_connection, stop_mission, save_mission, change_altitude, move_forward, add_current_waypoint, upload_mission
+from ALTIMETERfunctions import start_alt, stop_alt, getDistance_alt, exists_obstacle_under
 
 # Flight parameters
 flightaltitude = 2 #m ???????(invent)??????? m *******************************************
@@ -51,16 +53,13 @@ try:
         # Check altitude
         while (altitude != flightaltitude):
             change_altitude(vehicle, flightaltitude - altitude)
-    
-        # Depth data
-        depthframes = data_D435(pipe_D435)
 
         # Security parameters
         securitydistance = 2 # ???????(invent)??????? m *******************************************
         minpixels = 100 # ???????(invent)??????? pixels  *******************************************
     
         # Obstacle detected
-        if (exists_obstacle_ahead(depthframes, securitydistance, xmin, ymin, xmax, ymax, minpixels) == True):
+        if (exists_obstacle_ahead(pipe_D435, securitydistance, xmin, ymin, xmax, ymax, minpixels) == True):
             # saves the initial mssion
             initialmission = save_mission(vehicle) 
             # stops the initial mission
@@ -70,14 +69,14 @@ try:
             Ad = 0.5 # ???????(invent)??????? m  *******************************************
             d = 7 # ???????(invent)??????? m  *******************************************
             counter = 0
-            while (exists_obstacle_ahead(depthframes, securitydistance, xmin, ymin, xmax, ymax, minpixels) == True):
-                while (exists_obstacle_ahead(depthframes, securitydistance, xmin, ymin, xmax, ymax, minpixels) == True):
-                    while (exists_obstacle_ahead(depthframes, d, xmin, ymin, xmax, ymax, minpixels) == True):
+            while (exists_obstacle_ahead(pipe_D435, securitydistance, xmin, ymin, xmax, ymax, minpixels) == True):
+                while (exists_obstacle_ahead(pipe_D435, securitydistance, xmin, ymin, xmax, ymax, minpixels) == True):
+                    while (exists_obstacle_ahead(pipe_D435, d, xmin, ymin, xmax, ymax, minpixels) == True):
                         change_altitude(vehicle, Ah)
                         counter+=1
                     move_forward(vehicle, d - securitydistance, speed)
                 obstacle_under = True
-                while (exists_obstacle_ahead(depthframes, securitydistance + Ad, xmin, ymin, xmax, ymax, minpixels) == False and obstacle_under == True):
+                while (exists_obstacle_ahead(pipe_D435, securitydistance + Ad, xmin, ymin, xmax, ymax, minpixels) == False and obstacle_under == True):
                     if (exists_obstacle_under(pipe_alt, flightaltitude, counter*Ah) == False): 
                         change_altitude(vehicle, -counter*Ah)
                         obstacle_under = False

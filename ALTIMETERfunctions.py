@@ -10,15 +10,14 @@ def start_alt():
 # Returns distance measure 
 def getDistance_alt(pipe_alt):
     while True:
-        count = pipe_alt.in_waiting
+        bytes_serial = pipe_alt.in_waiting
         if (count > 8):
             recv = pipe_alt.read(9)
             pipe_alt.reset_input_buffer()
-            if ((recv[0] == 'Y') and (recv[1] == 'Y')):
-                low = int(recv[2].encode('hex'),16)
-                high = int(recv[3].encode('hex'),16)
-                distance = low + high * 256
-                return distance
+            if bytes_serial[0] == 0x59 and bytes_serial[1] == 0x59: # for Python 3   
+                distance = bytes_serial[2] + bytes_serial[3]*256 
+                return(distance)
+                ser.reset_input_buffer()
 
 # Compares altitude and returns True if there is an obstacle below the drone or False if not
 def exists_obstacle_under(pipe_alt, flightaltitude, change_altitude):
