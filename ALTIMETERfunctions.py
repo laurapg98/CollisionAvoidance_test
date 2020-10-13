@@ -8,7 +8,7 @@ def start_alt():
     return pipe_alt
 
 # Returns distance measure 
-def getDistance(pipe_alt):
+def getDistance_alt(pipe_alt):
     while True:
         count = pipe_alt.in_waiting
         if (count > 8):
@@ -22,7 +22,7 @@ def getDistance(pipe_alt):
 
 # Compares altitude and returns True if there is an obstacle below the drone or False if not
 def exists_obstacle_under(pipe_alt, flightaltitude, change_altitude):
-    if (pipe_alt == flightaltitude + change_altitude):
+    if (getDistance_alt(pipe_alt) == flightaltitude + change_altitude):
         return False
     else:
         return True
