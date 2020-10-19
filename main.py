@@ -12,13 +12,13 @@ flightaltitude = 2 #m ???????(invent)??????? m *********************************
 speed = 5 #m/s ???????(invent)??????? m *******************************************
 
 # Camera serial number (to identify it)
-serialnumber_D435 = "829212070982" # ******************* NÚM. DE SÈRIE DE LA CÀMERA *******************
+serialnumber_D435 = "829212070982"
 
 # Camera number of pixels
 xmin = 0
-xmax = 1280 
+xmax = 640 
 ymin = 0 
-ymax = 720 
+ymax = 480 
 
 # Connection with altimeter
 pipe_alt = None
