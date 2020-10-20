@@ -4,7 +4,7 @@ from pymavlink import mavutil
 # Starts connection with the drone (controller)
 def start_connection():
     # connection options: SITL
-    vehicle=connect('tcp:127.0.0.1:5760', wait_ready=True)
+    vehicle=connect('/dev/serial0',921600, wait_ready=True)
     return vehicle
 
 # Stops connection with the drone
