@@ -1,5 +1,4 @@
 import time
-#import serial
 from dronekit import connect, VehicleMode, Command, LocationGlobal
 
 # Import functions
