@@ -11,6 +11,10 @@ serialnumber_D435 = "829212070982"
 x_pixels = 640
 y_pixels = 480
 
+# Security parameters
+securitydistance = 2 # m *******************************************
+minpixels = 1000 # pixels *******************************************
+
 # Connection with D435 camera
 pipe_D435 = None
 while pipe_D435 == None:
@@ -35,10 +39,6 @@ try:
             #get_flight_altitude(vehicle, flightaltitude)
             print("Current altitude: " + str(altitude) + " m | Flight altitude: " + str(flightaltitude) + " m")
             altitude = vehicle.rangefinder.distance
-
-        # Security parameters
-        securitydistance = 2 # m *******************************************
-        minpixels = 1000 # pixels *******************************************
 
         # Obstacle detected
         if (exists_obstacle_ahead(pipe_D435, securitydistance, x_pixels, y_pixels, minpixels) == True):
