@@ -1,6 +1,3 @@
-import time
-from dronekit import connect, VehicleMode, Command, LocationGlobal
-
 # Import functions
 from D435functions import start_D435, exists_obstacle_ahead, stop_D435
 from DRONEfunctions import start_connection, stop_connection, stop_mission, save_mission, get_flight_altitude, change_altitude, move_forward, add_current_waypoint, test_mission, exists_obstacle_under, upload_mission
