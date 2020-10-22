@@ -57,7 +57,7 @@ def move_forward(vehicle, Ad, speed):
 
 # Adds current location as waypoint in a mission
 def add_current_waypoint(vehicle, missionvector, flightaltitude):
-    new_wp = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, vehicle.location.global_relative_frame.lat, vehicle.location.vehicle.location.global_relative_frame.lon, flightaltitude)
+    new_wp = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, vehicle.location.global_relative_frame.lat, vehicle.location.global_relative_frame.lon, flightaltitude)
     missionvector.append(new_wp)
     return missionvector
     
