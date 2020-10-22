@@ -7,7 +7,7 @@ x_pixels = 640
 y_pixels = 480
 
 # Security parameters
-securitydistance = 2 # m *******************************************
+securitydistance = 0.5 # m *******************************************
 minpixels = 1000 # pixels *******************************************
 
 # Connection with D435 camera
