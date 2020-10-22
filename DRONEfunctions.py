@@ -1,10 +1,27 @@
+"""
+FINAL BACHELOR'S THESIS
+
+TITLE: Multisensory help system to multiplatform drone navigation
+BACHELOR GRADE: Aerospace systems engineering (EETAC, UPC)
+
+AUTHOR: Laura Parga Gata
+ADVISOR: Sergi Tres Martínez
+SUPERVISOR: Oscar Casas Piedrafita
+
+ABSTRACT: Altitude maintenance and obstacle detection and avoidance systems for an autonomous flight drone
+In this file there are all the functions related with the drone: connection, messages and commands
+"""
+
+# Import libraries
 from dronekit import connect, VehicleMode, Command, LocationGlobal
 from pymavlink import mavutil
 
+import serial
+from math import asin,cos,pi,sin
+
 # Starts connection with the drone (controller)
 def start_connection():
-    # connection options: SITL
-    vehicle=connect('tcp:127.0.0.1:5760', wait_ready=True)
+    vehicle=connect('/dev/serial0', baud=921600, wait_ready=True)
     return vehicle
 
 # Stops connection with the drone
@@ -18,22 +35,35 @@ def stop_mission(vehicle):
 
 # Saves the actual mission & Returns it in a vector
 def save_mission(vehicle):
-    # Save
+    # Save mission
     vehicle.commands.download()
     vehicle.commands.wait_ready()
-    # Store
+    # Store mission
     missionvector=[]
     for waypoint in vehicle.commands:
         missionvector.append(waypoint)
     return missionvector
 
+# Changes to fligh altitude
+def get_flight_altitude(vehicle, flightaltitude):
+    # Current position
+    latitude = vehicle.location.global_frame.lat
+    longitude = vehicle.location.global_frame.lon
+    # Final position
+    newLocation = LocationGlobal(latitude, longitude, flightaltitude)
+    # Move drone
+    vehicle.gotoGPS(newLocation)
+
 # Changes (+ increase, - decrease) the altitude Ah m
 def change_altitude(vehicle, Ah):
-    latitude = vehicle.location.lat
-    longitude = vehicle.location.lon
+    # Current position
+    latitude = vehicle.location.global_frame.lat
+    longitude = vehicle.location.global_frame.lon
     currentAlt = vehicle.location.alt
+    # Final position
     newAlt = currentAlt + Ah
     newLocation = LocationGlobal(latitude, longitude, newAlt)
+    # Move drone
     vehicle.gotoGPS(newLocation)
 
 # Moves along Ad m
@@ -42,8 +72,8 @@ def move_forward(vehicle, Ad, speed):
     vehicle.send_global_velocity(speed, 0, 0, At)
 
 # Adds current location as waypoint in a mission
-def add_current_waypoint(vehicle, missionvector):
-    new_wp = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, vehicle.location.global_relative_frame.lat, vehicle.location.vehicle.location.global_relative_frame.alt.lon, )
+def add_current_waypoint(vehicle, missionvector, flightaltitude):
+    new_wp = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, vehicle.location.global_relative_frame.lat, vehicle.location.global_relative_frame.lon, flightaltitude)
     missionvector.append(new_wp)
     return missionvector
     
@@ -53,35 +83,66 @@ def upload_mission(vehicle, missionvector):
         vehicle.commands.add(waypoint)
     vehicle.commands.upload()
 
-# Uploads a mission from a file
-def upload_mission_from_file(vehicle, aFileName):
-    #Read mission from file
-    cmds = vehicle.commands
-    missionlist=[]
-    with open(aFileName) as f:
-        for i, line in enumerate(f):
-            if i==0:
-                if not line.startswith('QGC WPL 110'):
-                    raise Exception('File is not supported WP version')
-            else:
-                linearray=line.split('\t')
-                ln_index=int(linearray[0])
-                ln_currentwp=int(linearray[1])
-                ln_frame=int(linearray[2])
-                ln_command=int(linearray[3])
-                ln_param1=float(linearray[4])
-                ln_param2=float(linearray[5])
-                ln_param3=float(linearray[6])
-                ln_param4=float(linearray[7])
-                ln_param5=float(linearray[8])
-                ln_param6=float(linearray[9])
-                ln_param7=float(linearray[10])
-                ln_autocontinue=int(linearray[11].strip())
-                cmd = Command( 0, 0, 0, ln_frame, ln_command, ln_currentwp, ln_autocontinue, ln_param1, ln_param2, ln_param3, ln_param4, ln_param5, ln_param6, ln_param7)
-                missionlist.append(cmd)
-    #Clear existing mission from vehicle
-    stop_mission(vehicle)
-    #Add new mission to vehicle
-    for command in missionlist:
-        cmds.add(command)
+# Creates a mission (move along distance m) in order to test the code
+def test_mission(vehicle, flightaltitude, speed, distance):
+    # Current position
+    lat = vehicle.location.global_frame.lat
+    lon = vehicle.location.global_frame.lon
+    heading = vehicle.heading
+    # Final position
+    finalPoint = pointRadialDistance(lat, lon, heading, distance/1000)
+    # Create the mission
+        # Take-Off:
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_DO_SET_HOME, 0, 0, 1, 0, 0, 0, 0, 0, flightaltitude))
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_DO_SET_HOME, 0, 0, 1, 0, 0, 0, 0, 0, flightaltitude))
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 20, 0, 0, 0, 0, 0, flightaltitude))
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_DO_CHANGE_SPEED, 0, 0, 0, speed, 0, 0, 0, 0, flightaltitude))
+        # Mission
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, finalPoint.lat, finalPoint.lon, flightaltitude))
+        # Landing
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_DO_LAND_START, 0, 0, 0, 0, 0, 0, finalPoint.lat, finalPoint.lon, flightaltitude))
+    vehicle.commands.add(Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                    mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 0, 0, 0, 0, 0, finalPoint.lat, finalPoint.lon, flightaltitude))
+    # Upload the mission
     vehicle.commands.upload()
+    # Arm the drone
+    vehicle.mode = VehicleMode("AUTO")
+    vehicle.armed = True
+
+# Computes the final point given the current position (lat, lon) [º], bearing angle [º] and the distance [km] to move (straight)
+def pointRadialDistance(lat1, lon1, bearing, distance):
+    # Earth average radius
+    rEarth = 6371.01 # km
+    # Threshols for floating-point equality
+    epsilon = 0.000001 
+    # Conversions
+    rlat1 = lat1 * pi/180
+    rlon1 = lon1 * pi/180
+    degreeBearing = ((360-bearing)%360)
+    rbearing = degreeBearing * pi/180
+    rdistance = (distance)  / rEarth 
+    # Compute new latitude
+    rlat = asin(sin(rlat1) * cos(rdistance) + cos(rlat1) * sin(rdistance) * cos(rbearing) )
+    # Compute new longitude
+    if cos(rlat) == 0 or abs(cos(rlat)) < epsilon: # Endpoint a pole
+        rlon=rlon1
+    else:
+        rlon = ( (rlon1 - asin( sin(rbearing)* sin(rdistance) / cos(rlat) ) + pi ) % (2*pi) ) - pi
+    # Conversions to degrees
+    lat = rlat * 180/pi
+    lon = rlon * 180/pi
+    # New location (don't mind about altitude)
+    return LocationGlobal(lat, lon, 0)
+
+# Compares altitudes in order to know if there is an obstacle (True) or not (False) under the drone
+def exists_obstacle_under(vehicle, flightaltitude, Ah):
+    if (vehicle.rangefinder.distance < 0.95 * (flightaltitude + Ah)): # With a 5% of error
+        return True
+    else:
+        return False
