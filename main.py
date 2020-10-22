@@ -1,3 +1,16 @@
+"""
+FINAL BACHELOR'S THESIS
+
+TITLE: Multisensory help system to multiplatform drone navigation
+BACHELOR GRADE: Aerospace systems engineering (EETAC, UPC)
+
+AUTHOR: Laura Parga Gata
+ADVISOR: Sergi Tres Martínez
+SUPERVISOR: Oscar Casas Piedrafita
+
+ABSTRACT: Altitude maintenance and obstacle detection and avoidance systems for an autonomous flight drone
+"""
+
 # Import functions
 from D435functions import start_D435, exists_obstacle_ahead, stop_D435
 from DRONEfunctions import start_connection, stop_connection, stop_mission, save_mission, get_flight_altitude, change_altitude, move_forward, add_current_waypoint, test_mission, exists_obstacle_under, upload_mission
@@ -30,7 +43,7 @@ test_mission(vehicle, flightaltitude, speed, 100)
 
 try:
     while True:
-        
+
         # Check altitude (maximum 5% error)
         while (altitude >= 0.95 * flightaltitude and altitude <= 1.05 * flightaltitude):
             #get_flight_altitude(vehicle, flightaltitude)

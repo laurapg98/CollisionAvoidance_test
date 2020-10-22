@@ -1,3 +1,18 @@
+"""
+FINAL BACHELOR'S THESIS
+
+TITLE: Multisensory help system to multiplatform drone navigation
+BACHELOR GRADE: Aerospace systems engineering (EETAC, UPC)
+
+AUTHOR: Laura Parga Gata
+ADVISOR: Sergi Tres Martínez
+SUPERVISOR: Oscar Casas Piedrafita
+
+ABSTRACT: Altitude maintenance and obstacle detection and avoidance systems for an autonomous flight drone
+In this file there are all the functions related with the Intel Realsense depth camera D435, used to obstacle detection
+"""
+
+# Import libraries
 import pyrealsense2 as libRS
 
 # Starts connection with the camera

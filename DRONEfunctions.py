@@ -1,6 +1,22 @@
-import serial
+"""
+FINAL BACHELOR'S THESIS
+
+TITLE: Multisensory help system to multiplatform drone navigation
+BACHELOR GRADE: Aerospace systems engineering (EETAC, UPC)
+
+AUTHOR: Laura Parga Gata
+ADVISOR: Sergi Tres Martínez
+SUPERVISOR: Oscar Casas Piedrafita
+
+ABSTRACT: Altitude maintenance and obstacle detection and avoidance systems for an autonomous flight drone
+In this file there are all the functions related with the drone: connection, messages and commands
+"""
+
+# Import libraries
 from dronekit import connect, VehicleMode, Command, LocationGlobal
 from pymavlink import mavutil
+
+import serial
 from math import asin,cos,pi,sin
 
 # Starts connection with the drone (controller)
